@@ -132,4 +132,28 @@ public class ConnectionManagementIT
         k3po.finish();
     }
 
+    @Test
+    @Specification({
+            "${spec}/goaway.connection/client",
+            "${spec}/goaway.connection/server",
+    })
+    public void goawayConnection() throws Exception
+    {
+        k3po.start();
+        k3po.notifyBarrier("ROUTED_INPUT");
+        k3po.finish();
+    }
+
+    @Test
+    @Specification({
+            "${spec}/reset.connection/client",
+            "${spec}/reset.connection/server",
+    })
+    public void resetConnection() throws Exception
+    {
+        k3po.start();
+        k3po.notifyBarrier("ROUTED_INPUT");
+        k3po.finish();
+    }
+
 }
