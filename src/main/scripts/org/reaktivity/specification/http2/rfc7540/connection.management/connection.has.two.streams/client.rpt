@@ -52,7 +52,7 @@ read [0x00 0x00 0x00]                   # length = 0
      [0x00 0x00 0x00 0x00]              # stream_id = 0
 
 # First request HEADERS for /script.js stream_id = 1
-write [0x00 0x00 0x1e]                  # length = 30
+write [0x00 0x00 0x23]                  # length = 35
       [0x01]                            # HEADERS frame
       [0x04]                            # END_HEADERS
       [0x00 0x00 0x00 0x01]             # stream_id = 1
@@ -60,6 +60,7 @@ write [0x00 0x00 0x1e]                  # length = 30
       [0x86]                            # :scheme: http
       [0x04] [0x0a] "/script.js"        # :path: /script.js
       [0x01] [0x0e] "localhost:8080"    # :authority: localhost:8080
+      [0x0f 0x0d 0x02] "12"             # content-length
 write flush
 
 write [0x00 0x00 0x00]                  # length = 0
@@ -93,7 +94,7 @@ read [0x00 0x00 0x58]                                      # length
      [0x0f 0x0d] [0x02] "15"                               # content-length
 
 # Second request HEADERS for /style.css stream_id = 3
-write [0x00 0x00 0x1e]                  # length = 30
+write [0x00 0x00 0x23]                  # length = 35
       [0x01]                            # HEADERS frame
       [0x04]                            # END_HEADERS
       [0x00 0x00 0x00 0x03]             # stream_id = 3
@@ -101,6 +102,7 @@ write [0x00 0x00 0x1e]                  # length = 30
       [0x86]                            # :scheme: http
       [0x04] [0x0a] "/style.css"        # :path: /style.css
       [0x01] [0x0e] "localhost:8080"    # :authority: localhost:8080
+      [0x0f 0x0d 0x02] "19"             # content-length
 write flush
 
 # connection-level flow control
@@ -116,7 +118,6 @@ read [0x00 0x00 0x04]                                      # length
      [0x00 0x00 0x00 0x03]                                 # stream_id=3
      [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
 
-
 # second response HEADERS stream_id = 3
 read [0x00 0x00 0x58]                                      # length
      [0x01]                                                # HTTP2 HEADERS frame
@@ -127,8 +128,6 @@ read [0x00 0x00 0x58]                                      # length
      [0x0f 0x12] [0x1d] "Wed, 01 Feb 2017 19:12:46 GMT"    # date
      [0x0f 0x10] [0x18] "text/html; charset=UTF-8"         # content-type
      [0x0f 0x0d] [0x02] "31"                               # content-length
-
-
 
 write [0x00 0x00 0x0c]                  # length = 12
       [0x00]                            # HTTP2 DATA frame

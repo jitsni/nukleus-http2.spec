@@ -40,14 +40,26 @@ public class FlowControlIT
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${nukleus}/stream.flow/client",
-            "${nukleus}/stream.flow/server"
+            "${nukleus}/stream.flow.client/client",
+            "${nukleus}/stream.flow.client/server"
     })
-    public void streamFlow() throws Exception
+    public void streamFlowClient() throws Exception
     {
         k3po.start();
         k3po.notifyBarrier("ROUTED_CLIENT");
         k3po.finish();
     }
 
+    @Test
+    @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
+    @Specification({
+            "${nukleus}/stream.flow.server/client",
+            "${nukleus}/stream.flow.server/server"
+    })
+    public void streamFlowServer() throws Exception
+    {
+        k3po.start();
+        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.finish();
+    }
 }

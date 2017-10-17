@@ -32,7 +32,7 @@ write [0x00 0x00 0x0c]                   # length = 12
       [0x00]                             # flags = 0x00
       [0x00 0x00 0x00 0x00]              # stream_id = 0
       [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
-      [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x03) = 0
+      [0x00 0x04 0x00 0x00 0x00 0x3c]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 60
 write flush
 
 # client connection preface
@@ -54,7 +54,7 @@ write [0x00 0x00 0x00]                  # length = 0
       [0x00 0x00 0x00 0x00]             # stream_id = 0
 write flush
 
-read [0x00 0x00 0x18]                   # length = 24
+read [0x00 0x00 0x19]                   # length = 25
      [0x01]                             # HEADERS frame
      [0x04]                             # END_HEADERS
      [0x00 0x00 0x00 0x01]              # stream_id = 1
@@ -62,26 +62,12 @@ read [0x00 0x00 0x18]                   # length = 24
      [0x86]                             # :scheme: http
      [0x84]                             # :path: /
      [0x01] [0x0e] "localhost:8080"     # :authority: localhost:8080
-     [0x0f 0x0d 0x02] "12"              # content-length
+     [0x0f 0x0d 0x03] "130"             # content-length
 
 read [0x00 0x00 0x00]                   # length = 0
      [0x04]                             # HTTP2 SETTINGS frame
      [0x01]                             # ACK
      [0x00 0x00 0x00 0x00]              # stream_id = 0
-
-# connection-level flow control
-write [0x00 0x00 0x04]                                      # length
-      [0x08]                                                # WINDOW_UPDATE frame
-      [0x00]                                                # no flags
-      [0x00 0x00 0x00 0x00]                                 # stream_id=0
-      [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
-# stream-level flow control
-write [0x00 0x00 0x04]                                      # length
-      [0x08]                                                # WINDOW_UPDATE frame
-      [0x00]                                                # no flags
-      [0x00 0x00 0x00 0x01]                                 # stream_id=1
-      [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
-write flush
 
 write [0x00 0x00 0x59]                                      # length
       [0x01]                                                # HTTP2 HEADERS frame
@@ -94,16 +80,37 @@ write [0x00 0x00 0x59]                                      # length
       [0x0f 0x0d] [0x03] "113"                              # content-length
 write flush
 
-read [0x00 0x00 0x0c]                   # length = 12
-     [0x00]                             # HTTP2 DATA frame
-     [0x01]                             # END_STREAM
-     [0x00 0x00 0x00 0x01]              # stream_id = 1
-     "Hello, world"
-
-write [0x00 0x00 0x71]                  # length = 113
+read  [0x00 0x00 0x3c]                  # length = 60
       [0x00]                            # HTTP2 DATA frame
       [0x00]                            # no flags
-      [0x00 0x00 0x00 0x01]             # stream_id=1
+      [0x00 0x00 0x00 0x01]             # stream_id = 1
+      "This is a very long text. An extremely long text. Really... "
+
+# connection-level flow control
+write [0x00 0x00 0x04]                         # length
+      [0x08]                                   # WINDOW_UPDATE frame
+      [0x00]                                   # no flags
+      [0x00 0x00 0x00 0x00]                    # stream_id=0
+      [0x00 0x00 0x00 0x46]                    # window size increment = 70
+
+# stream-level flow control
+write [0x00 0x00 0x04]                         # length
+      [0x08]                                   # WINDOW_UPDATE frame
+      [0x00]                                   # no flags
+      [0x00 0x00 0x00 0x01]                    # stream_id=1
+      [0x00 0x00 0x00 0x46]                    # window size increment = 70
+write flush
+
+read  [0x00 0x00 0x46]                  # length = 70
+      [0x00]                            # HTTP2 DATA frame
+      [0x01]                            # END_STREAM
+      [0x00 0x00 0x00 0x01]             # stream_id = 1
+	  "really long. No, really, it is very long. About this size. And more..."
+
+write [0x00 0x00 0x71]                          # length = 113
+      [0x00]                                    # HTTP2 DATA frame
+      [0x01]                                    # END_STREAM
+      [0x00 0x00 0x00 0x01]                     # stream_id=1
       "<html>"
       "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
       "<body><script src=\"script.js\"></script></body>"

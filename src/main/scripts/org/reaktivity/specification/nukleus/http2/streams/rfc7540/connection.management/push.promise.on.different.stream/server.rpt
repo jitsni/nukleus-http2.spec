@@ -33,6 +33,7 @@ read nukleus:begin.ext ${http:header(":method", "POST")}
                        ${http:header(":scheme", "http")}
                        ${http:header(":path", "/")}
                        ${http:header(":authority", "localhost:8080")}
+                       ${http:header("content-length", "0")}
 
 write nukleus:begin.ext ${http:header(":status", "200")}
                         ${http:header("server", "CERN/3.0 libwww/2.17")}

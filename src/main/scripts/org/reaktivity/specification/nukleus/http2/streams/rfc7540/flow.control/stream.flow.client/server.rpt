@@ -29,7 +29,7 @@ read nukleus:begin.ext ${http:header(":method", "POST")}
                        ${http:header(":scheme", "http")}
                        ${http:header(":path", "/")}
                        ${http:header(":authority", "localhost:8080")}
-                       ${http:header("content-length", "0")}
+                       ${http:header("content-length", "12")}
 
 write nukleus:begin.ext ${http:header(":status", "200")}
                         ${http:header("server", "CERN/3.0 libwww/2.17")}
@@ -39,10 +39,10 @@ write nukleus:begin.ext ${http:header(":status", "200")}
 
 connected
 
+read "This is a very long text. An extremely long text. Really... really long. No, really, it is very long. About this size. And more..."
+
 write "<html>"
       "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
-write flush
-
-write "<body><script src=\"script.js\"></script></body>"
+      "<body><script src=\"script.js\"></script></body>"
       "</html>"
 write flush
