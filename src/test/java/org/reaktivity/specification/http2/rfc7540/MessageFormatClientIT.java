@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.reaktivity.specification.nukleus.http2.streams.rfc7540;
+package org.reaktivity.specification.http2.rfc7540;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,10 +27,10 @@ import org.kaazing.k3po.junit.rules.K3poRule;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.rules.RuleChain.outerRule;
 
-public class MessageFormatIT
+public class MessageFormatClientIT
 {
     private final K3poRule k3po = new K3poRule()
-            .addScriptRoot("nukleus", "org/reaktivity/specification/nukleus/http2/streams/rfc7540/message.format");
+        .addScriptRoot("spec", "org/reaktivity/specification/http2/rfc7540/message.format.client");
 
     private final TestRule timeout = new DisableOnDebug(new Timeout(10, SECONDS));
 
@@ -40,78 +40,79 @@ public class MessageFormatIT
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${nukleus}/continuation.frames/client",
-            "${nukleus}/continuation.frames/server"
+            "${spec}/continuation.frames/client",
+            "${spec}/continuation.frames/server",
     })
     public void continuationFrames() throws Exception
     {
         k3po.start();
-        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.notifyBarrier("ROUTED_SERVER");
         k3po.finish();
     }
 
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${nukleus}/dynamic.table.requests/client",
-            "${nukleus}/dynamic.table.requests/server"
+            "${spec}/dynamic.table.requests/client",
+            "${spec}/dynamic.table.requests/server",
     })
     public void dynamicTableRequests() throws Exception
     {
         k3po.start();
-        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.notifyBarrier("ROUTED_SERVER");
         k3po.finish();
     }
 
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${nukleus}/max.frame.size/client",
-            "${nukleus}/max.frame.size/server"
+            "${spec}/max.frame.size/client",
+            "${spec}/max.frame.size/server",
     })
     public void maxFrameSize() throws Exception
     {
         k3po.start();
-        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.notifyBarrier("ROUTED_SERVER");
         k3po.finish();
     }
 
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${nukleus}/max.nukleus.data.frame.size/client",
-            "${nukleus}/max.nukleus.data.frame.size/server"
+            "${spec}/max.nukleus.data.frame.size/client",
+            "${spec}/max.nukleus.data.frame.size/server",
     })
     public void maxNukleusDataFrameSize() throws Exception
     {
         k3po.start();
-        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.notifyBarrier("ROUTED_SERVER");
         k3po.finish();
     }
 
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${nukleus}/connection.headers/client",
-            "${nukleus}/connection.headers/server"
+            "${spec}/connection.headers/client",
+            "${spec}/connection.headers/server",
     })
     public void connectionHeaders() throws Exception
     {
         k3po.start();
-        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.notifyBarrier("ROUTED_SERVER");
         k3po.finish();
     }
 
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${nukleus}/stream.id.order/client",
-            "${nukleus}/stream.id.order/server"
+            "${spec}/stream.id.order/client",
+            "${spec}/stream.id.order/server",
     })
     public void streamIdOrder() throws Exception
     {
         k3po.start();
-        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.notifyBarrier("ROUTED_SERVER");
         k3po.finish();
     }
+
 }

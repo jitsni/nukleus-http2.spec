@@ -21,7 +21,7 @@ connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
         option nukleus:window 8192
-        option nukleus:transmission "duplex"
+        option nukleus:transmission "half-duplex"
 
 
 write nukleus:begin.ext ${http:header(":method", "POST")}
@@ -30,28 +30,25 @@ write nukleus:begin.ext ${http:header(":method", "POST")}
                         ${http:header(":authority", "localhost:8080")}
                         ${http:header("content-length", "12")}
 
+connected
+
+write "Hello, world"
+write flush
+
 read nukleus:begin.ext ${http:header(":status", "200")}
                        ${http:header("server", "CERN/3.0 libwww/2.17")}
                        ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                        ${http:header("content-type", "text/html; charset=UTF-8")}
                        ${http:header("content-length", "15")}
 
-connected
-
-write notify CLIENT2
-
-write "Hello, world"
-write flush
-
 read "function f() {"
      "}"
-
 
 connect await CLIENT2
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
         option nukleus:window 8192
-        option nukleus:transmission "duplex"
+        option nukleus:transmission "half-duplex"
 
 
 write nukleus:begin.ext ${http:header(":method", "POST")}
@@ -60,16 +57,16 @@ write nukleus:begin.ext ${http:header(":method", "POST")}
                         ${http:header(":authority", "localhost:8080")}
                         ${http:header("content-length", "19")}
 
+connected
+
+write "Hello, world, again"
+write flush
+
 read nukleus:begin.ext ${http:header(":status", "200")}
                        ${http:header("server", "CERN/3.0 libwww/2.17")}
                        ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                        ${http:header("content-type", "text/html; charset=UTF-8")}
                        ${http:header("content-length", "31")}
-
-connected
-
-write "Hello, world, again"
-write flush
 
 read "h1 {"
      "    color: blue;"

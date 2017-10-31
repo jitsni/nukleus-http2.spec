@@ -32,7 +32,7 @@ write [0x00 0x00 0x0c]                   # length = 12
       [0x00]                             # flags = 0x00
       [0x00 0x00 0x00 0x00]              # stream_id = 0
       [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
-      [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x03) = 0
+      [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 0
 write flush
 
 # client connection preface
@@ -46,7 +46,7 @@ read  [0x00 0x00 0x0c]                   # length = 12
       [0x00]                             # flags = 0x00
       [0x00 0x00 0x00 0x00]              # stream_id = 0
       [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
-      [0x00 0x04 0x00 0x00 0xff 0xff]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 65535
+      [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 0
 
 write [0x00 0x00 0x00]                  # length = 0
       [0x04]                            # HTTP2 SETTINGS frame
@@ -83,6 +83,12 @@ write [0x00 0x00 0x04]                                      # length
       [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
 write flush
 
+read [0x00 0x00 0x0c]                   # length = 12
+     [0x00]                             # HTTP2 DATA frame
+     [0x01]                             # END_STREAM
+     [0x00 0x00 0x00 0x01]              # stream_id = 1
+     "Hello, world"
+
 write [0x00 0x00 0x58]                                      # length
       [0x01]                                                # HTTP2 HEADERS frame
       [0x04]                                                # END_HEADERS
@@ -93,6 +99,42 @@ write [0x00 0x00 0x58]                                      # length
       [0x0f 0x10] [0x18] "text/html; charset=UTF-8"         # content-type
       [0x0f 0x0d] [0x02] "15"                               # content-length
 write flush
+
+# connection-level flow control
+read [0x00 0x00 0x04]                                      # length
+     [0x08]                                                # WINDOW_UPDATE frame
+     [0x00]                                                # no flags
+     [0x00 0x00 0x00 0x00]                                 # stream_id=0
+     [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
+# stream-level flow control
+read [0x00 0x00 0x04]                                      # length
+     [0x08]                                                # WINDOW_UPDATE frame
+     [0x00]                                                # no flags
+     [0x00 0x00 0x00 0x01]                                 # stream_id=1
+     [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
+
+write [0x00 0x00 0x0f]                  # length = 15
+      [0x00]                            # HTTP2 DATA frame
+      [0x00]                            # no flags
+      [0x00 0x00 0x00 0x01]             # stream_id=1
+      "function f() {"
+      "}"
+write flush
+
+# connection-level flow control
+read [0x00 0x00 0x04]                                      # length
+     [0x08]                                                # WINDOW_UPDATE frame
+     [0x00]                                                # no flags
+     [0x00 0x00 0x00 0x00]                                 # stream_id=0
+     [0x00 0x00 0x00 0x0F]                                 # window size increment = 15
+# stream-level flow control
+read [0x00 0x00 0x04]                                      # length
+     [0x08]                                                # WINDOW_UPDATE frame
+     [0x00]                                                # no flags
+     [0x00 0x00 0x00 0x01]                                 # stream_id=1
+     [0x00 0x00 0x00 0x0F]                                 # window size increment = 15
+
+read notify CLIENT2                     # we notify the second client to start
 
 read [0x00 0x00 0x23]                   # length = 35
      [0x01]                             # HEADERS frame
@@ -117,6 +159,12 @@ write [0x00 0x00 0x04]                                      # length
       [0x00 0x00 0x00 0x03]                                 # stream_id=3
       [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
 
+read [0x00 0x00 0x13]                   # length = 19
+     [0x00]                             # HTTP2 DATA frame
+     [0x01]                             # END_STREAM
+     [0x00 0x00 0x00 0x03]              # stream_id = 3
+     "Hello, world, again"
+
 write [0x00 0x00 0x58]                                      # length
       [0x01]                                                # HTTP2 HEADERS frame
       [0x04]                                                # END_HEADERS
@@ -128,28 +176,18 @@ write [0x00 0x00 0x58]                                      # length
       [0x0f 0x0d] [0x02] "31"                               # content-length
 write flush
 
-
-read [0x00 0x00 0x0c]                   # length = 12
-     [0x00]                             # HTTP2 DATA frame
-     [0x01]                             # END_STREAM
-     [0x00 0x00 0x00 0x01]              # stream_id = 1
-     "Hello, world"
-
-write [0x00 0x00 0x0f]                  # length = 15
-      [0x00]                            # HTTP2 DATA frame
-      [0x00]                            # no flags
-      [0x00 0x00 0x00 0x01]             # stream_id=1
-      "function f() {"
-      "}"
-write flush
-
-
-
-read [0x00 0x00 0x13]                   # length = 19
-     [0x00]                             # HTTP2 DATA frame
-     [0x01]                             # END_STREAM
-     [0x00 0x00 0x00 0x03]              # stream_id = 3
-     "Hello, world, again"
+# connection-level flow control
+read [0x00 0x00 0x04]                                      # length
+     [0x08]                                                # WINDOW_UPDATE frame
+     [0x00]                                                # no flags
+     [0x00 0x00 0x00 0x00]                                 # stream_id=0
+     [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
+# stream-level flow control
+read [0x00 0x00 0x04]                                      # length
+     [0x08]                                                # WINDOW_UPDATE frame
+     [0x00]                                                # no flags
+     [0x00 0x00 0x00 0x03]                                 # stream_id=3
+     [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
 
 write [0x00 0x00 0x15]                  # length = 31
       [0x00]                            # HTTP2 DATA frame
