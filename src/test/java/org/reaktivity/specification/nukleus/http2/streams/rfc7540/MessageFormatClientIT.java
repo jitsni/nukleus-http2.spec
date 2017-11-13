@@ -60,6 +60,8 @@ public class MessageFormatClientIT
     {
         k3po.start();
         k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.notifyBarrier("CLIENT_2");
+        k3po.notifyBarrier("CLIENT_3");
         k3po.finish();
     }
 
@@ -83,19 +85,6 @@ public class MessageFormatClientIT
             "${nukleus}/max.nukleus.data.frame.size/server"
     })
     public void maxNukleusDataFrameSize() throws Exception
-    {
-        k3po.start();
-        k3po.notifyBarrier("ROUTED_CLIENT");
-        k3po.finish();
-    }
-
-    @Test
-    @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
-    @Specification({
-            "${nukleus}/connection.headers/client",
-            "${nukleus}/connection.headers/server"
-    })
-    public void connectionHeaders() throws Exception
     {
         k3po.start();
         k3po.notifyBarrier("ROUTED_CLIENT");

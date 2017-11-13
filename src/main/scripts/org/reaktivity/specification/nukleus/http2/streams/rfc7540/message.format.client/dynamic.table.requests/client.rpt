@@ -17,68 +17,76 @@
 property newClientAcceptRef ${nuklei:newReferenceId()} # external scope
 property clientTransport "nukleus://http2/streams/source"
 
+# C.3.1.  First Request
 connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
         option nukleus:window 8192
-        option nukleus:transmission "duplex"
+        option nukleus:transmission "half-duplex"
 
-# C.3.1.  First Request
 write nukleus:begin.ext ${http:header(":method", "GET")}
                         ${http:header(":scheme", "http")}
                         ${http:header(":path", "/")}
                         ${http:header(":authority", "localhost:8080")}
+connected
 
 read nukleus:begin.ext ${http:header(":status", "200")}
                        ${http:header("server", "CERN/3.0 libwww/2.17")}
                        ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                        ${http:header("content-type", "text/html; charset=UTF-8")}
                        ${http:header("content-length", "113")}
-connected
+read "<html>"
+     "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+     "<body><script src=\"script.js\"></script></body>"
+     "</html>"
 
-
-
-
-connect await ROUTED_CLIENT
-        ${clientTransport}
-        option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
-        option nukleus:transmission "duplex"
 
 # C.3.2.  Second Request
+connect await CLIENT_2
+        ${clientTransport}
+        option nukleus:route ${newClientAcceptRef}
+        option nukleus:window 8192
+        option nukleus:transmission "half-duplex"
+
 write nukleus:begin.ext ${http:header(":method", "GET")}
                         ${http:header(":scheme", "http")}
                         ${http:header(":path", "/")}
                         ${http:header(":authority", "localhost:8080")}
+                        ${http:header("cache-control", "no-cache")}
+connected
 
 read nukleus:begin.ext ${http:header(":status", "200")}
                        ${http:header("server", "CERN/3.0 libwww/2.17")}
                        ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                        ${http:header("content-type", "text/html; charset=UTF-8")}
                        ${http:header("content-length", "113")}
-connected
+read "<html>"
+     "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+     "<body><script src=\"script.js\"></script></body>"
+     "</html>"
 
 
-
-
-connect await ROUTED_CLIENT
+# C.3.3.  Third Request
+connect await CLIENT_3
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
         option nukleus:window 8192
-        option nukleus:transmission "duplex"
+        option nukleus:transmission "half-duplex"
 
-# C.3.3.  Third Request
 write nukleus:begin.ext ${http:header(":method", "GET")}
                         ${http:header(":scheme", "https")}
                         ${http:header(":path", "/index.html")}
                         ${http:header(":authority", "localhost:8080")}
                         ${http:header("custom-key", "custom-value")}
-
+connected
 
 read nukleus:begin.ext ${http:header(":status", "200")}
                        ${http:header("server", "CERN/3.0 libwww/2.17")}
                        ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                        ${http:header("content-type", "text/html; charset=UTF-8")}
                        ${http:header("content-length", "113")}
-connected
 
+read "<html>"
+     "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+     "<body><script src=\"script.js\"></script></body>"
+     "</html>"

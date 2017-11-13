@@ -48,79 +48,152 @@ read  [0x00 0x00 0x0c]                   # length = 12
       [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
       [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 0
 
-write [0x00 0x00 0x00]                  # length = 0
-      [0x04]                            # HTTP2 SETTINGS frame
-      [0x01]                            # ACK
-      [0x00 0x00 0x00 0x00]             # stream_id = 0
+write [0x00 0x00 0x00]                   # length = 0
+      [0x04]                             # HTTP2 SETTINGS frame
+      [0x01]                             # ACK
+      [0x00 0x00 0x00 0x00]              # stream_id = 0
 write flush
 
 #
 # C.3.1.  First Request
 #
-read [0x00 0x00 0x13]                  # length = 29
-     [0x01]                            # HEADERS frame
-     [0x05]                            # END_HEADERS | END_STREAM
-     [0x00 0x00 0x00 0x01]             # stream_id = 1
-     [0x82]                            # :method: GET
-     [0x86]                            # :scheme: http
-     [0x84]                            # :path: /
-     [0x41 0x0e] "localhost:8080"     # :authority: localhost:8080
+read  [0x00 0x00 0x13]                   # length = 20
+      [0x01]                             # HEADERS frame
+      [0x05]                             # END_HEADERS | END_STREAM
+      [0x00 0x00 0x00 0x01]              # stream_id = 1
+      [0x82]                             # :method: GET
+      [0x86]                             # :scheme: http
+      [0x84]                             # :path: /
+      [0x01 0x0e] "localhost:8080"       # :authority: localhost:8080
 
-read [0x00 0x00 0x00]                   # length = 0
-     [0x04]                             # HTTP2 SETTINGS frame
-     [0x01]                             # ACK
-     [0x00 0x00 0x00 0x00]              # stream_id = 0
+read [0x00 0x00 0x00]                    # length = 0
+     [0x04]                              # HTTP2 SETTINGS frame
+     [0x01]                              # ACK
+     [0x00 0x00 0x00 0x00]               # stream_id = 0
+
+# First Response
+write [0x00 0x00 0x56]                                  # length
+      [0x01]                                            # HTTP2 HEADERS frame
+      [0x04]                                            # END_HEADERS
+      [0x00 0x00 0x00 0x01]                             # stream_id=1
+      [0x88]                                            # :status: 200
+      [0x76] [0x14] "CERN/3.0 libwww/2.17"              # server
+      [0x61] [0x1d] "Wed, 01 Feb 2017 19:12:46 GMT"     # date
+      [0x5f] [0x18] "text/html; charset=UTF-8"          # content-type
+      [0x0f 0x0d] [0x03] "113"                          # content-length
+write flush
+
+# connection-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x00]               # stream_id=0
+     [0x00 0x00 0x20 0x00]               # window size increment = 8192
+# stream-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x01]               # stream_id=1
+     [0x00 0x00 0x20 0x00]               # window size increment = 8192
+
+write [0x00 0x00 0x71]                   # length = 113
+      [0x00]                             # HTTP2 DATA frame
+      [0x00]                             # no flags
+      [0x00 0x00 0x00 0x01]              # stream_id=1
+      "<html>"
+      "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+      "<body><script src=\"script.js\"></script></body>"
+      "</html>"
+
+# connection-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x00]               # stream_id=0
+     [0x00 0x00 0x00 0x71]               # window size increment = 113
+# stream-level flow control
+read notify CLIENT_2
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x01]               # stream_id=1
+     [0x00 0x00 0x00 0x71]               # window size increment = 113
+
 
 #
 # C.3.2.  Second Request
 #
-read [0x00 0x00 0x0e]                  # length = 14
-     [0x01]                            # HEADERS frame
-     [0x05]                            # END_HEADERS | END_STREAM
-     [0x00 0x00 0x00 0x03]             # stream_id = 3
-     [0x82]                            # :method: GET
-     [0x86]                            # :scheme: http
-     [0x84]                            # :path: /
-     [0xbe]                            # :authority: www.example.com
-     [0x58 0x08] "no-cache"            # cache-control: no-cache
+read  [0x00 0x00 0x1e]                   # length = 30
+      [0x01]                             # HEADERS frame
+      [0x05]                             # END_HEADERS | END_STREAM
+      [0x00 0x00 0x00 0x03]              # stream_id = 3
+      [0x82]                             # :method: GET
+      [0x86]                             # :scheme: http
+      [0x84]                             # :path: /
+      [0x01 0x0e] "localhost:8080"       # :authority: localhost:8080
+      [0x0f 0x09] [0x08] "no-cache"      # cache-control: no-cache
+
+# Second Response
+write [0x00 0x00 0x0a]                   # length
+      [0x01]                             # HTTP2 HEADERS frame
+      [0x04]                             # END_HEADERS
+      [0x00 0x00 0x00 0x03]              # stream_id=3
+      [0x88]                             # :status: 200
+      [0xc0]                             # server
+      [0xbf]                             # date
+      [0xbe]                             # content-type
+      [0x0f 0x0d] [0x03] "113"           # content-length
+write flush
+
+# connection-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x00]               # stream_id=0
+     [0x00 0x00 0x20 0x00]               # window size increment = 8192
+# stream-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x03]               # stream_id=3
+     [0x00 0x00 0x20 0x00]               # window size increment = 8192
+
+write [0x00 0x00 0x71]                   # length = 113
+      [0x00]                             # HTTP2 DATA frame
+      [0x00]                             # no flags
+      [0x00 0x00 0x00 0x03]              # stream_id=3
+      "<html>"
+      "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+      "<body><script src=\"script.js\"></script></body>"
+      "</html>"
+
+# connection-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x00]               # stream_id=0
+     [0x00 0x00 0x00 0x71]               # window size increment = 113
+# stream-level flow control
+read notify CLIENT_3
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x03]               # stream_id=3
+     [0x00 0x00 0x00 0x71]               # window size increment = 113
+
 
 #
 # C.3.3.  Third Request
 #
-read [0x00 0x00 0x1d]                                  # length = 29
-     [0x01]                                            # HEADERS frame
-     [0x05]                                            # END_HEADERS | END_STREAM
-     [0x00 0x00 0x00 0x05]                             # stream_id = 5
-     [0x82]                                            # :method: GET
-     [0x87]                                            # :scheme: https
-     [0x85]                                            # :path: /index.html
-     [0xbf]                                            # :authority: www.example.com
-     [0x40 0x0a] "custom-key" [0x0c] "custom-value"    # custom-key: custom-value
-
-
-# First Response
-write [0x00 0x00 0x59]                                      # length
-      [0x01]                                                # HTTP2 HEADERS frame
-      [0x04]                                                # END_HEADERS
-      [0x00 0x00 0x00 0x01]                                 # stream_id=1
-      [0x88]                                                # :status: 200
-      [0x0f 0x27] [0x14] "CERN/3.0 libwww/2.17"             # server
-      [0x0f 0x12] [0x1d] "Wed, 01 Feb 2017 19:12:46 GMT"    # date
-      [0x0f 0x10] [0x18] "text/html; charset=UTF-8"         # content-type
-      [0x0f 0x0d] [0x03] "113"                              # content-length
-write flush
-
-# Second Response
-write [0x00 0x00 0x59]                                      # length
-      [0x01]                                                # HTTP2 HEADERS frame
-      [0x04]                                                # END_HEADERS
-      [0x00 0x00 0x00 0x03]                                 # stream_id=3
-      [0x88]                                                # :status: 200
-      [0x0f 0x27] [0x14] "CERN/3.0 libwww/2.17"             # server
-      [0x0f 0x12] [0x1d] "Wed, 01 Feb 2017 19:12:46 GMT"    # date
-      [0x0f 0x10] [0x18] "text/html; charset=UTF-8"         # content-type
-      [0x0f 0x0d] [0x03] "113"                              # content-length
-write flush
+read  [0x00 0x00 0x2c]                   # length = 44
+      [0x01]                             # HEADERS frame
+      [0x05]                             # END_HEADERS | END_STREAM
+      [0x00 0x00 0x00 0x05]              # stream_id = 5
+      [0x82]                             # :method: GET
+      [0x87]                             # :scheme: https
+      [0x85]                             # :path: /index.html
+      [0x01 0x0e] "localhost:8080"       # :authority: localhost:8080
+      [0x00 0x0a] "custom-key" [0x0c] "custom-value"    # custom-key: custom-value
 
 # Third Response
 write [0x00 0x00 0x59]                                      # length
@@ -133,3 +206,38 @@ write [0x00 0x00 0x59]                                      # length
       [0x0f 0x10] [0x18] "text/html; charset=UTF-8"         # content-type
       [0x0f 0x0d] [0x03] "113"                              # content-length
 write flush
+
+# connection-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x00]               # stream_id=0
+     [0x00 0x00 0x20 0x00]               # window size increment = 8192
+# stream-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x05]               # stream_id=5
+     [0x00 0x00 0x20 0x00]               # window size increment = 8192
+
+write [0x00 0x00 0x71]                   # length = 113
+      [0x00]                             # HTTP2 DATA frame
+      [0x00]                             # no flags
+      [0x00 0x00 0x00 0x05]              # stream_id=5
+      "<html>"
+      "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+      "<body><script src=\"script.js\"></script></body>"
+      "</html>"
+
+# connection-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x00]               # stream_id=0
+     [0x00 0x00 0x00 0x71]               # window size increment = 113
+# stream-level flow control
+read [0x00 0x00 0x04]                    # length
+     [0x08]                              # WINDOW_UPDATE frame
+     [0x00]                              # no flags
+     [0x00 0x00 0x00 0x05]               # stream_id=5
+     [0x00 0x00 0x00 0x71]               # window size increment = 113

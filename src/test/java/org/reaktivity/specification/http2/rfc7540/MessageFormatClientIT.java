@@ -92,19 +92,6 @@ public class MessageFormatClientIT
     @Test
     @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
     @Specification({
-            "${spec}/connection.headers/client",
-            "${spec}/connection.headers/server",
-    })
-    public void connectionHeaders() throws Exception
-    {
-        k3po.start();
-        k3po.notifyBarrier("ROUTED_SERVER");
-        k3po.finish();
-    }
-
-    @Test
-    @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
-    @Specification({
             "${spec}/stream.id.order/client",
             "${spec}/stream.id.order/server",
     })

@@ -19,61 +19,67 @@ property newServerConnectRef ${newClientAcceptRef} # external scope
 
 property serverTransport "nukleus://target/streams/http2#source"
 
+# C.3.1.  First Request
 accept ${serverTransport}
         option nukleus:route ${newServerConnectRef}
         option nukleus:window 8192
-        option nukleus:transmission "duplex"
-
-
+        option nukleus:transmission "half-duplex"
 accepted
 
-# C.3.1.  First Request
 read nukleus:begin.ext ${http:header(":method", "GET")}
                        ${http:header(":scheme", "http")}
                        ${http:header(":path", "/")}
                        ${http:header(":authority", "localhost:8080")}
+connected
 
 write nukleus:begin.ext ${http:header(":status", "200")}
                         ${http:header("server", "CERN/3.0 libwww/2.17")}
                         ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                         ${http:header("content-type", "text/html; charset=UTF-8")}
                         ${http:header("content-length", "113")}
-connected
+write "<html>"
+      "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+      "<body><script src=\"script.js\"></script></body>"
+      "</html>"
 
-
-
-
-accepted
 
 # C.3.2.  Second Request
+accepted
+
 read nukleus:begin.ext ${http:header(":method", "GET")}
                        ${http:header(":scheme", "http")}
                        ${http:header(":path", "/")}
                        ${http:header(":authority", "localhost:8080")}
+                       ${http:header("cache-control", "no-cache")}
+connected
 
 write nukleus:begin.ext ${http:header(":status", "200")}
                         ${http:header("server", "CERN/3.0 libwww/2.17")}
                         ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                         ${http:header("content-type", "text/html; charset=UTF-8")}
                         ${http:header("content-length", "113")}
-connected
+write "<html>"
+      "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+      "<body><script src=\"script.js\"></script></body>"
+      "</html>"
 
-
-
-
-accepted
 
 # C.3.3.  Third Request
+accepted
+
 read nukleus:begin.ext ${http:header(":method", "GET")}
                        ${http:header(":scheme", "https")}
                        ${http:header(":path", "/index.html")}
                        ${http:header(":authority", "localhost:8080")}
                        ${http:header("custom-key", "custom-value")}
-
+connected
 
 write nukleus:begin.ext ${http:header(":status", "200")}
                         ${http:header("server", "CERN/3.0 libwww/2.17")}
                         ${http:header("date", "Wed, 01 Feb 2017 19:12:46 GMT")}
                         ${http:header("content-type", "text/html; charset=UTF-8")}
                         ${http:header("content-length", "113")}
-connected
+write "<html>"
+      "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
+      "<body><script src=\"script.js\"></script></body>"
+      "</html>"
