@@ -86,6 +86,15 @@ read  [0x00 0x00 0x04]                                      # length
       [0x00]                                                # no flags
       [0x00 0x00 0x00 0x01]                                 # stream_id=1
       [0x00 0x00 0xc3 0x50]                                 # window size increment = 50000
+
+#
+# response DATA frame
+#
+write [0x00 0x4e 0x20]                          # length = 20000
+      [0x00]                                    # HTTP2 DATA frame
+      [0x00]                                    # no flags
+      [0x00 0x00 0x00 0x01]                     # stream_id=1
+write ${data20k}
 write flush
 
 #
@@ -96,15 +105,7 @@ write [0x00 0x4e 0x20]                          # length = 20000
       [0x00]                                    # no flags
       [0x00 0x00 0x00 0x01]                     # stream_id=1
 write ${data20k}
-
-#
-# response DATA frame
-#
-write [0x00 0x4e 0x20]                          # length = 20000
-      [0x00]                                    # HTTP2 DATA frame
-      [0x00]                                    # no flags
-      [0x00 0x00 0x00 0x01]                     # stream_id=1
-write ${data20k}
+write flush
 
 #
 # response DATA frame
@@ -114,6 +115,7 @@ write [0x00 0x27 0x10]                          # length = 10000
       [0x01]                                    # END_STREAM
       [0x00 0x00 0x00 0x01]                     # stream_id=1
 write ${data10k}
+write flush
 
 #
 # response HEADERS frame
@@ -140,6 +142,7 @@ write [0x00 0x00 0x04]                                      # length
       [0x00]                                                # no flags
       [0x00 0x00 0x00 0x01]                                 # stream_id=1
       [0x00 0x00 0xEA 0x60]                                 # window size increment = 60000
+write flush
 
 #
 # response DATA frame

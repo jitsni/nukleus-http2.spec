@@ -16,7 +16,6 @@
 
 property newServerAcceptRef ${nuklei:newReferenceId()} # external
 property newClientConnectRef ${newServerAcceptRef}
-property data ${http2:randomBytes(65527)}
 
 property serverTransport "nukleus://target/streams/http2#source"
 
@@ -28,12 +27,13 @@ accepted
 connected
 
 # server connection preface - SETTINGS frame
-write [0x00 0x00 0x0c]                   # length = 12
+write [0x00 0x00 0x12]                   # length = 18
       [0x04]                             # HTTP2 SETTINGS frame
       [0x00]                             # flags = 0x00
       [0x00 0x00 0x00 0x00]              # stream_id = 0
       [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
-      [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x03) = 0
+      [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 0
+      [0x00 0x05 0x00 0x00 0xff 0xfa]    # SETTINGS_MAX_FRAME_SIZE(0x05) = 65530
 write flush
 
 # client connection preface
@@ -46,8 +46,8 @@ read [0x00 0x00 0x0c]                   # length = 12
      [0x04]                             # HTTP2 SETTINGS frame
      [0x00]                             # flags = 0x00
      [0x00 0x00 0x00 0x00]              # stream_id = 0
-     [0x00 0x04 0x00 0x00 0xff 0xf7]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 65527
-     [0x00 0x05 0x00 0x00 0xff 0xf7]    # SETTINGS_MAX_FRAME_SIZE(0x05) = 65527
+     [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
+     [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x04) = 0
 
 write [0x00 0x00 0x00]                   # length = 0
       [0x04]                             # HTTP2 SETTINGS frame
@@ -58,32 +58,61 @@ write flush
 #
 # request headers with HEADERS frames
 #
-read [0x00 0x00 0x13]                  # length = 19
+read [0x00 0x00 0x1b]                  # length = 27
      [0x01]                            # HEADERS frame
-     [0x05]                            # END_HEADERS | END_STREAM
+     [0x04]                            # END_HEADERS
      [0x00 0x00 0x00 0x01]             # stream_id = 1
-     [0x82]                            # :method: GET
+     [0x83]                            # :method: POST
      [0x86]                            # :scheme: http
      [0x84]                            # :path: /
      [0x01] [0x0e] "localhost:8080"    # :authority: localhost:8080
+     [0x0f 0x0d] [0x05] "65530"        # content-length
 
 read [0x00 0x00 0x00]                  # length = 0
      [0x04]                            # HTTP2 SETTINGS frame
      [0x01]                            # ACK
      [0x00 0x00 0x00 0x00]             # stream_id = 0
 
+# connection-level flow control
+write [0x00 0x00 0x04]                                      # length
+      [0x08]                                                # WINDOW_UPDATE frame
+      [0x00]                                                # no flags
+      [0x00 0x00 0x00 0x00]                                 # stream_id=0
+      [0x00 0x01 0x00 0x00]                                 # window size increment = 65535
+# stream-level flow control
+write [0x00 0x00 0x04]                                      # length
+      [0x08]                                                # WINDOW_UPDATE frame
+      [0x00]                                                # no flags
+      [0x00 0x00 0x00 0x01]                                 # stream_id=1
+      [0x00 0x01 0x00 0x00]                                 # window size increment = 65535
+write flush
+
+#
+# request HTTP2 DATA
+# comes in two DATA frames
+#
+read [0x00 0xff 0xf6]                          # length = 65526
+     [0x00]                                    # HTTP2 DATA frame
+     [0x00]                                    # no flags
+     [0x00 0x00 0x00 0x01]                     # stream_id=1
+read [0..65526]
+
+read [0x00 0x00 0x04]                          # length = 4
+     [0x00]                                    # HTTP2 DATA frame
+     [0x01]                                    # END_STREAM
+     [0x00 0x00 0x00 0x01]                     # stream_id=1
+read [0..4]
+
 #
 # response HEADERS frame
 #
-write [0x00 0x00 0x5b]                                      # length
+write [0x00 0x00 0x38]                                      # length
       [0x01]                                                # HTTP2 HEADERS frame
-      [0x04]                                                # END_HEADERS
+      [0x05]                                                # END_HEADERS | END_STREAM
       [0x00 0x00 0x00 0x01]                                 # stream_id=1
       [0x88]                                                # :status: 200
       [0x0f 0x27] [0x14] "CERN/3.0 libwww/2.17"             # server
       [0x0f 0x12] [0x1d] "Wed, 01 Feb 2017 19:12:46 GMT"    # date
-      [0x0f 0x10] [0x18] "text/html; charset=UTF-8"         # content-type
-      [0x0f 0x0d] [0x05] "65527"                            # content-length
 write flush
 
 # connection-level flow control
@@ -103,9 +132,8 @@ read [0x00 0x00 0x04]                                      # length
 #
 # response DATA frame
 #
-write [0x00 0xff 0xf7]                          # length = 65527
+write [0x00 0x00 0x00]                          # length = 0
       [0x00]                                    # HTTP2 DATA frame
-      [0x00]                                    # no flags
+      [0x01]                                    # END_STREAM
       [0x00 0x00 0x00 0x01]                     # stream_id=1
-write ${data}
 write flush

@@ -17,9 +17,6 @@
 property newServerAcceptRef ${nuklei:newReferenceId()} # external
 property newClientConnectRef ${newServerAcceptRef}
 
-property data20k ${http2:randomBytes(20000)}
-property data15k ${http2:randomBytes(15000)}
-
 property serverTransport "nukleus://target/streams/http2#source"
 
 accept ${serverTransport}
