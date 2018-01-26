@@ -29,6 +29,7 @@ write nukleus:begin.ext ${http:headers()
                               .item(":scheme", "http")
                               .item(":path", "/script.js")
                               .item(":authority", "localhost:8080")
+                              .item("content-length", "12")
                               .build()}
 
 read nukleus:begin.ext ${http:headers()
@@ -60,6 +61,7 @@ write nukleus:begin.ext ${http:headers()
                               .item(":scheme", "http")
                               .item(":path", "/style.css")
                               .item(":authority", "localhost:8080")
+                              .item("content-length", "19")
                               .build()}
 
 read nukleus:begin.ext ${http:headers()
