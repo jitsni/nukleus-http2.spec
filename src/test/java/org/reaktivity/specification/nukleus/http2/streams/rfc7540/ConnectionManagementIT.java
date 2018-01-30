@@ -263,4 +263,17 @@ public class ConnectionManagementIT
         k3po.finish();
     }
 
+    @Test
+    @ScriptProperty("serverTransport \"nukleus://http2/streams/source\"")
+    @Specification({
+            "${streams}/http.unknown.authority/client",
+            "${streams}/http.unknown.authority/server"
+    })
+    public void httpUnknownAuthority() throws Exception
+    {
+        k3po.start();
+        k3po.notifyBarrier("ROUTED_CLIENT");
+        k3po.finish();
+    }
+
 }
