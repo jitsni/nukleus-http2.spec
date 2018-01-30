@@ -126,7 +126,7 @@ read [0x00 0x00 0x04]                                      # length
      [0x00 0x00 0x00 0x01]                                 # stream_id=1
      [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
 
-#read notify UPDATE_RECEIVED
+read notify UPDATE_RECEIVED
 
 read [0x00 0x00 0x04]                          # length = 4
      [0x03]                                    # HTTP2 RST_STREAM frame

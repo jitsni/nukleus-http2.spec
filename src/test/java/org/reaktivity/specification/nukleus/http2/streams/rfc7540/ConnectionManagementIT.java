@@ -87,7 +87,7 @@ public class ConnectionManagementIT
     {
         k3po.start();
         k3po.notifyBarrier("ROUTED_CLIENT");
-        //k3po.notifyBarrier("CLIENT2");
+        k3po.notifyBarrier("CLIENT2");
         k3po.finish();
     }
 
@@ -127,7 +127,7 @@ public class ConnectionManagementIT
     {
         k3po.start();
         k3po.notifyBarrier("ROUTED_CLIENT");
-//        k3po.notifyBarrier("UPDATE_RECEIVED");
+        k3po.notifyBarrier("UPDATE_RECEIVED");
         k3po.finish();
     }
 

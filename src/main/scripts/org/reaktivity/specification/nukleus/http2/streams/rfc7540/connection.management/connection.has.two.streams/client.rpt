@@ -21,7 +21,7 @@ connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
         option nukleus:window 8192
-        option nukleus:transmission "duplex"
+        option nukleus:transmission "half-duplex"
 
 
 write nukleus:begin.ext ${http:headers()
@@ -31,6 +31,10 @@ write nukleus:begin.ext ${http:headers()
                               .item(":authority", "localhost:8080")
                               .item("content-length", "12")
                               .build()}
+connected
+
+write "Hello, world"
+write flush
 
 read nukleus:begin.ext ${http:headers()
                              .item(":status", "200")
@@ -40,20 +44,14 @@ read nukleus:begin.ext ${http:headers()
                              .item("content-length", "15")
                              .build()}
 
-connected
-
-write "Hello, world"
-write flush
-
 read "function f() {"
      "}"
 
-
-connect await ROUTED_CLIENT
+connect await CLIENT2
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
         option nukleus:window 8192
-        option nukleus:transmission "duplex"
+        option nukleus:transmission "half-duplex"
 
 
 write nukleus:begin.ext ${http:headers()
@@ -64,6 +62,11 @@ write nukleus:begin.ext ${http:headers()
                               .item("content-length", "19")
                               .build()}
 
+connected
+
+write "Hello, world, again"
+write flush
+
 read nukleus:begin.ext ${http:headers()
                              .item(":status", "200")
                              .item("server", "CERN/3.0 libwww/2.17")
@@ -71,11 +74,6 @@ read nukleus:begin.ext ${http:headers()
                              .item("content-type", "text/html; charset=UTF-8")
                              .item("content-length", "31")
                              .build()}
-
-connected
-
-write "Hello, world, again"
-write flush
 
 read "h1 {"
      "    color: blue;"
