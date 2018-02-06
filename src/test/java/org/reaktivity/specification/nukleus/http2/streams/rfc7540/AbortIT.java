@@ -22,6 +22,7 @@ import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
+import org.reaktivity.specification.nukleus.NukleusRule;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.rules.RuleChain.outerRule;
@@ -33,8 +34,10 @@ public class AbortIT
 
     private final TestRule timeout = new DisableOnDebug(new Timeout(10, SECONDS));
 
+    private final NukleusRule nukleus = new NukleusRule().directory("target/nukleus-itests");
+
     @Rule
-    public final TestRule chain = outerRule(k3po).around(timeout);
+    public final TestRule chain = outerRule(nukleus).around(k3po).around(timeout);
 
     @Test
     @Specification({

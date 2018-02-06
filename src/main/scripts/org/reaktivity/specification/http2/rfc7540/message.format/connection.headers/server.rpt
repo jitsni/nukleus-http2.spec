@@ -24,7 +24,6 @@ property serverTransport "nukleus://target/streams/http2#source"
 
 accept ${serverTransport}
        option nukleus:route ${newClientConnectRef}
-       option nukleus:window 40000
        option nukleus:transmission "duplex"
 accepted
 connected

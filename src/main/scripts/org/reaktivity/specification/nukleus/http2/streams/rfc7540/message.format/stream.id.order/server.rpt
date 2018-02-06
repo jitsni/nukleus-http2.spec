@@ -21,7 +21,6 @@ property serverTransport "nukleus://target/streams/http2#source"
 
 accept ${serverTransport}
         option nukleus:route ${newServerConnectRef}
-        option nukleus:window 8192
         option nukleus:transmission "half-duplex"
 
 #
@@ -51,7 +50,7 @@ write notify CONNECTION_1_RECEIVED
 write await SEND_PUSH_PROMISE
 
 # First push promise
-write nukleus:data.ext ${http:headers()
+write nukleus:transfer.ext ${http:headers()
                              .item(":method", "GET")
                              .item(":scheme", "http")
                              .item(":path", "/push")
@@ -88,7 +87,7 @@ write notify CONNECTION_2_RECEIVED
 write await SEND_PUSH_PROMISE
 
 # First push promise
-write nukleus:data.ext ${http:headers()
+write nukleus:transfer.ext ${http:headers()
                              .item(":method", "GET")
                              .item(":scheme", "http")
                              .item(":path", "/push")
@@ -126,7 +125,7 @@ write await CONNECTION_2_RECEIVED
 write notify SEND_PUSH_PROMISE
 
 # First push promise
-write nukleus:data.ext ${http:headers()
+write nukleus:transfer.ext ${http:headers()
                              .item(":method", "GET")
                              .item(":scheme", "http")
                              .item(":path", "/push")

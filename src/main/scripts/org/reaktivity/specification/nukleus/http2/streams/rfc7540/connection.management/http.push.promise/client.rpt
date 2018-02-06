@@ -20,7 +20,6 @@ property clientTransport "nukleus://http2/streams/source"
 connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "duplex"
 
 
@@ -45,7 +44,7 @@ write "Hello, world"
 write flush
 
 # First push promise
-read nukleus:data.ext ${http:headers()
+read nukleus:transfer.ext ${http:headers()
                             .item(":method", "GET")
                             .item(":scheme", "http")
                             .item(":path", "/style.css")
@@ -54,7 +53,7 @@ read nukleus:data.ext ${http:headers()
 read notify FIRST_PUSH_PROMISE_RECEIVED
 
 # Second push promise
-read nukleus:data.ext ${http:headers()
+read nukleus:transfer.ext ${http:headers()
                             .item(":method", "GET")
                             .item(":scheme", "http")
                             .item(":path", "/script.js")
@@ -74,7 +73,6 @@ read "<html>"
 connect await FIRST_PUSH_PROMISE_RECEIVED
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "duplex"
 
 write nukleus:begin.ext ${http:headers()
@@ -105,7 +103,6 @@ read "h1 {"
 connect await SECOND_PUSH_PROMISE_RECEIVED
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "duplex"
 
 write nukleus:begin.ext ${http:headers()

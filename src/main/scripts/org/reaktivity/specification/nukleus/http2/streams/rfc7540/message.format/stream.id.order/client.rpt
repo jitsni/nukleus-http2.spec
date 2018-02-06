@@ -23,7 +23,6 @@ property clientTransport "nukleus://http2/streams/source"
 connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "half-duplex"
 write nukleus:begin.ext ${http:headers()
                               .item(":method", "GET")
@@ -44,7 +43,7 @@ read nukleus:begin.ext ${http:headers()
                              .build()}
 
 # First push promise
-read nukleus:data.ext ${http:headers()
+read nukleus:transfer.ext ${http:headers()
                             .item(":method", "GET")
                             .item(":scheme", "http")
                             .item(":path", "/push")
@@ -57,7 +56,6 @@ read nukleus:data.ext ${http:headers()
 connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "half-duplex"
 write nukleus:begin.ext ${http:headers()
                               .item(":method", "GET")
@@ -78,7 +76,7 @@ read nukleus:begin.ext ${http:headers()
                              .build()}
 
 # First push promise
-read nukleus:data.ext ${http:headers()
+read nukleus:transfer.ext ${http:headers()
                             .item(":method", "GET")
                             .item(":scheme", "http")
                             .item(":path", "/push")
@@ -91,7 +89,6 @@ read nukleus:data.ext ${http:headers()
 connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "half-duplex"
 write nukleus:begin.ext ${http:headers()
                               .item(":method", "GET")
@@ -112,7 +109,7 @@ read nukleus:begin.ext ${http:headers()
                              .build()}
 
 # First push promise
-read nukleus:data.ext ${http:headers()
+read nukleus:transfer.ext ${http:headers()
                             .item(":method", "GET")
                             .item(":scheme", "http")
                             .item(":path", "/push")

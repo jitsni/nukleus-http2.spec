@@ -20,7 +20,6 @@ property clientTransport "nukleus://http2/streams/source"
 connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "duplex"
 
 
@@ -51,7 +50,6 @@ read "function f() {"
 connect await ROUTED_CLIENT
         ${clientTransport}
         option nukleus:route ${newClientAcceptRef}
-        option nukleus:window 8192
         option nukleus:transmission "duplex"
 
 

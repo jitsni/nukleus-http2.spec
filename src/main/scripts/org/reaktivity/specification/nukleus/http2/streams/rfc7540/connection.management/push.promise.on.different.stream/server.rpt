@@ -21,7 +21,6 @@ property serverTransport "nukleus://target/streams/http2#source"
 
 accept ${serverTransport}
         option nukleus:route ${newServerConnectRef}
-        option nukleus:window 8192
         option nukleus:transmission "duplex"
 
 #
@@ -49,7 +48,7 @@ connected
 write await SECOND_REQUEST_RECEIVED
 
 # First push promise
-write nukleus:data.ext ${http:headers()
+write nukleus:transfer.ext ${http:headers()
                              .item(":method", "GET")
                              .item(":scheme", "http")
                              .item(":path", "/style.css")
@@ -58,7 +57,7 @@ write nukleus:data.ext ${http:headers()
 write flush
 
 # Second push promise
-write nukleus:data.ext ${http:headers()
+write nukleus:transfer.ext ${http:headers()
                              .item(":method", "GET")
                              .item(":scheme", "http")
                              .item(":path", "/script.js")
@@ -121,7 +120,7 @@ write nukleus:begin.ext ${http:headers()
 connected
 
 # Third push promise
-write nukleus:data.ext ${http:headers()
+write nukleus:transfer.ext ${http:headers()
                              .item(":method", "GET")
                              .item(":scheme", "http")
                              .item(":path", "/widget.css")

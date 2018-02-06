@@ -20,8 +20,6 @@ property data ${http2:randomBytes(55000)}
 accept await ROUTED_SERVER
         "nukleus://target/streams/http2"
         option nukleus:route ${newServerConnectRef}
-        option nukleus:window 0
-        option nukleus:update "none"            # So that some request body gets buffered
         option nukleus:transmission "duplex"
 accepted
 
