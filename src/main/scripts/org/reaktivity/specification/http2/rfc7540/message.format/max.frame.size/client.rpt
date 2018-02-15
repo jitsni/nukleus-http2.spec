@@ -30,12 +30,11 @@ write "PRI * HTTP/2.0\r\n"
 write flush
 
 # server connection preface - SETTINGS frame
-read [0x00 0x00 0x0c]                   # length = 12
+read [0x00 0x00 0x06]                   # length = 12
      [0x04]                             # HTTP2 SETTINGS frame
      [0x00]                             # flags = 0x00
      [0x00 0x00 0x00 0x00]              # stream_id = 0
      [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
-     [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x03) = 0
 
 write [0x00 0x00 0x12]                   # length = 18
       [0x04]                             # HTTP2 SETTINGS frame
@@ -84,7 +83,7 @@ read [0x00 0x00 0x5b]                                      # length
      [0x0f 0x0d] [0x05] "30000"                            # content-length
 
 #
-# response DATA frame
+# response DATA frame (20000 = max frame size)
 #
 read [0x00 0x4e 0x20]                          # length = 20000
      [0x00]                                    # HTTP2 DATA frame
@@ -93,24 +92,10 @@ read [0x00 0x4e 0x20]                          # length = 20000
 read [0..20000]
 
 #
-# response DATA frame 9000 = (30000 - 20000 - padding:1000)
+# response DATA frame 10000 = (30000 - 20000)
 #
-read [0x00 0x23 0x28]                          # length = 9000
+read [0x00 0x27 0x10]                          # length = 10000
      [0x00]                                    # HTTP2 DATA frame
      [0x00]                                    # no flags
      [0x00 0x00 0x00 0x01]                     # stream_id=1
-read [0..9000]
-
-# stream-level flow control
-write [0x00 0x00 0x04]                         # length
-     [0x08]                                    # WINDOW_UPDATE frame
-     [0x00]                                    # no flags
-     [0x00 0x00 0x00 0x01]                     # stream_id=1
-     [0x00 0x00 0x03 0xe8]                     # window size increment = 1000
-
-read [0x00 0x03 0xe8]                          # length = 1000
-     [0x00]                                    # HTTP2 DATA frame
-     [0x00]                                    # no flags
-     [0x00 0x00 0x00 0x01]                     # stream_id=1
-read [0..1000]
-
+read [0..10000]

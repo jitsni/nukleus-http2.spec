@@ -18,8 +18,7 @@ property newServerAcceptRef ${nuklei:newReferenceId()} # external
 property newClientConnectRef ${newServerAcceptRef}
 
 property data20k ${http2:randomBytes(20000)}
-property data9k ${http2:randomBytes(9000)}
-property data1k ${http2:randomBytes(1000)}
+property data10k ${http2:randomBytes(10000)}
 
 property serverTransport "nukleus://target/streams/http2#source"
 
@@ -36,12 +35,11 @@ read "PRI * HTTP/2.0\r\n"
       "\r\n"
 
 # server connection preface - SETTINGS frame
-write [0x00 0x00 0x0c]                   # length = 12
+write [0x00 0x00 0x06]                   # length = 12
       [0x04]                             # HTTP2 SETTINGS frame
       [0x00]                             # flags = 0x00
       [0x00 0x00 0x00 0x00]              # stream_id = 0
       [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
-      [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x03) = 0
 write flush
 
 read [0x00 0x00 0x12]                   # length = 18
@@ -100,26 +98,11 @@ write ${data20k}
 write flush
 
 #
-# response DATA frame 9000 = (30000 - 20000 - padding:1000)
+# response DATA frame 10000 = (30000 - 20000)
 #
-write [0x00 0x23 0x28]                          # length = 9000
+write [0x00 0x27 0x10]                          # length = 10000
       [0x00]                                    # HTTP2 DATA frame
       [0x00]                                    # no flags
       [0x00 0x00 0x00 0x01]                     # stream_id=1
-write ${data9k}
+write ${data10k}
 write flush
-
-# stream-level flow control
-read [0x00 0x00 0x04]                           # length
-     [0x08]                                     # WINDOW_UPDATE frame
-     [0x00]                                     # no flags
-     [0x00 0x00 0x00 0x01]                      # stream_id=1
-     [0x00 0x00 0x03 0xe8]                      # window size increment = 1000
-
-write [0x00 0x03 0xe8]                          # length = 1000
-      [0x00]                                    # HTTP2 DATA frame
-      [0x00]                                    # no flags
-     [ 0x00 0x00 0x00 0x01]                     # stream_id=1
-write ${data1k}
-write flush
-

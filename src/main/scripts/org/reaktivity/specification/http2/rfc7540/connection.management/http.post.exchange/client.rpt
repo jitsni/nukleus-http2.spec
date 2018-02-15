@@ -30,12 +30,11 @@ write "PRI * HTTP/2.0\r\n"
 write flush
 
 # server connection preface - SETTINGS frame
-read [0x00 0x00 0x0c]                   # length = 12
+read [0x00 0x00 0x06]                   # length = 12
      [0x04]                             # HTTP2 SETTINGS frame
      [0x00]                             # flags = 0x00
      [0x00 0x00 0x00 0x00]              # stream_id = 0
      [0x00 0x03 0x00 0x00 0x00 0x64]    # SETTINGS_MAX_CONCURRENT_STREAMS(0x03) = 100
-     [0x00 0x04 0x00 0x00 0x00 0x00]    # SETTINGS_INITIAL_WINDOW_SIZE(0x03) = 0
 
 write [0x00 0x00 0x0c]                   # length = 12
       [0x04]                             # HTTP2 SETTINGS frame
@@ -66,18 +65,25 @@ write [0x00 0x00 0x00]                  # length = 0
       [0x00 0x00 0x00 0x00]             # stream_id = 0
 write flush
 
+write [0x00 0x00 0x0c]                  # length = 12
+      [0x00]                            # HTTP2 DATA frame
+      [0x01]                            # END_STREAM
+      [0x00 0x00 0x00 0x01]             # stream_id = 1
+      "Hello, world"
+write flush
+
 # connection-level flow control
 read [0x00 0x00 0x04]                                      # length
      [0x08]                                                # WINDOW_UPDATE frame
      [0x00]                                                # no flags
      [0x00 0x00 0x00 0x00]                                 # stream_id=0
-     [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
+     [0x00 0x00 0x00 0x0c]                                 # window size increment = 12
 # stream-level flow control
 read [0x00 0x00 0x04]                                      # length
      [0x08]                                                # WINDOW_UPDATE frame
      [0x00]                                                # no flags
      [0x00 0x00 0x00 0x01]                                 # stream_id=1
-     [0x00 0x00 0x20 0x00]                                 # window size increment = 8192
+     [0x00 0x00 0x00 0x0c]                                 # window size increment = 12
 
 read [0x00 0x00 0x59]                                      # length
      [0x01]                                                # HTTP2 HEADERS frame
@@ -89,13 +95,6 @@ read [0x00 0x00 0x59]                                      # length
      [0x0f 0x10] [0x18] "text/html; charset=UTF-8"         # content-type
      [0x0f 0x0d] [0x03] "113"                              # content-length
 
-write [0x00 0x00 0x0c]                  # length = 12
-      [0x00]                            # HTTP2 DATA frame
-      [0x01]                            # END_STREAM
-      [0x00 0x00 0x00 0x01]             # stream_id = 1
-      "Hello, world"
-write flush
-
 read [0x00 0x00 0x71]                          # length = 113
      [0x00]                                    # HTTP2 DATA frame
      [0x00]                                    # no flags
@@ -104,4 +103,3 @@ read [0x00 0x00 0x71]                          # length = 113
      "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>"
      "<body><script src=\"script.js\"></script></body>"
      "</html>"
-
