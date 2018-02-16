@@ -97,5 +97,7 @@ read [0x00 0x00 0x04]                                      # length
 
 write abort
 
+write aborted
+
 read aborted
 

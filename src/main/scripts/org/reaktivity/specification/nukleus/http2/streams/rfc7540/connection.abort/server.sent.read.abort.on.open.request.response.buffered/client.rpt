@@ -39,7 +39,6 @@ read nukleus:begin.ext ${http:headers()
                              .build()}
 
 read ${data}
-read notify SYNC
 
 write aborted
 

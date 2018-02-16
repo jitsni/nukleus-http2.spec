@@ -99,5 +99,7 @@ read [0..384]
 
 write abort
 
+write aborted
+
 read aborted
 

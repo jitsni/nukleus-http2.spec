@@ -41,7 +41,6 @@ write nukleus:begin.ext ${http:headers()
 
 write ${data}
 
-read await SYNC
 read abort
 
 write aborted
