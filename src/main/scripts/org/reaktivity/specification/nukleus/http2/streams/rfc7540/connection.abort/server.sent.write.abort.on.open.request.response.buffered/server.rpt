@@ -31,6 +31,8 @@ read nukleus:begin.ext ${http:headers()
                              .build()}
 connected
 
+read "Hello, world"
+
 write nukleus:begin.ext ${http:headers()
                               .item(":status", "200")
                               .item("server", "CERN/3.0 libwww/2.17")

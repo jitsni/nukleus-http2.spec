@@ -15,7 +15,7 @@
 #
 
 property newServerConnectRef ${nuklei:newReferenceId()} # external scope
-property data ${http2:randomBytes(55000)}
+property data ${http2:randomBytes(20000)}
 
 accept await ROUTED_SERVER
         "nukleus://target/streams/http2"
@@ -30,6 +30,8 @@ read nukleus:begin.ext ${http:headers()
                              .item(":authority", "localhost:8080")
                              .build()}
 connected
+
+read "Hello, world"
 
 write nukleus:begin.ext ${http:headers()
                               .item(":status", "200")

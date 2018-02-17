@@ -15,6 +15,7 @@
  */
 package org.reaktivity.specification.nukleus.http2.streams.rfc7540;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
@@ -63,6 +64,7 @@ public class AbortIT
         k3po.finish();
     }
 
+    @Ignore("read abort races with begin")
     @Test
     @Specification({
             "${streams}/server.sent.read.abort.on.open.request.response.buffered/client",
